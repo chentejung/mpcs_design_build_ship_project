@@ -1,0 +1,6 @@
+# Course materials (instructor copyright)
+*.pdf
+
+# OS / editor
+.DS_Store
+.vercel

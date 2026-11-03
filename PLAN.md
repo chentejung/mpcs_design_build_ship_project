@@ -148,6 +148,7 @@ At least 3 per idea, before the page is final. Record their words.
 ---
 
 ## Decisions log
+- **Nov 3 update:** page now covers **Audit Workbench only** (Filing Analyzer kept here for reference, not on the page). Users: auditors. Focus: **Holistic Journey + AI** — AI gives suggestions for the initial financial analysis for auditors to inspect. Problem statement rewritten in my own words on the page.
 - Two tabs on one page; pick which to build after interviews, before Nov 10.
 - Idea 1 = auditor productivity tool (not a training simulator).
 - Idea 1 frameworks: IFRS + ISA; v1 = Revenue + AR only; synthetic companies via deterministic engine; fixed schedule templates in v1.

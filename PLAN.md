@@ -21,7 +21,7 @@
 Auditors at small firms spend days hand-building rollforwards and lead schedules from client journals before they can even start testing; Audit Workbench turns raw journals into reconciled workpapers and a flagged list of what to look into.
 
 ### Who it's for
-Auditors at **small external audit firms and sole practitioners** using **IFRS + ISA**. Large vendors (MindBridge, Caseware, Fieldguide, Inflo, DataSnipper) are enterprise-priced (~$20K–$150K/yr for some), and Big 4 have in-house platforms.
+Long-term audience: **all auditors**, as clarified on Nov 6. Small external audit firms and sole practitioners are a possible initial segment, not a permanent constraint. The current Revenue/AR prototype assumes **IFRS + ISA**; interviews should segment respondents by audit type, organization size, jurisdiction and frameworks before choosing the initial market. Earlier broad competitor price estimates are unverified and should not drive positioning.
 
 ### The problem (in my words, as a former auditor)
 Every line item has its own movements, its own supporting schedules and its own column layouts. Inventory = opening + purchases − cost of sales ± adjustments − write-downs; cash, AR, inventory all come from completely different source sheets. Reconciling each one and spotting what doesn't make sense is slow, manual and repetitive.
@@ -148,6 +148,8 @@ At least 3 per idea, before the page is final. Record their words.
 ---
 
 ## Decisions log
+- **Nov 6 latest direction:** start with financial-statement draft automation through accounting skills and orchestration. Focus on understanding existing workbook rules/formulas, preserving calculation logic during source updates, and detecting anomalies. See `research/2026-11-06-drafting-assistant-direction.md`. Earlier Revenue/AR scope remains a possible first skill; it is not a complete specification for the newly chosen drafting outcome. Detailed scope and implementation remain pending.
+- **Nov 6 audience clarification:** the ambition is to serve all auditors. Small external audit firms can be the initial goal; the discovery form should include other auditor segments and analyze their needs separately. This does not expand the current Revenue/AR prototype scope automatically.
 - **Nov 3 update:** page now covers **Audit Workbench only** (Filing Analyzer kept here for reference, not on the page). Users: auditors. Focus: **Holistic Journey + AI** — AI gives suggestions for the initial financial analysis for auditors to inspect. Problem statement rewritten in my own words on the page.
 - Two tabs on one page; pick which to build after interviews, before Nov 10.
 - Idea 1 = auditor productivity tool (not a training simulator).

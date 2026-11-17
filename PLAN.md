@@ -27,7 +27,7 @@ An orchestrator with one agent per **cycle** examines a client's **client-prepar
 
 **Stage 1 — line-item schedules**
 - Every line item (shallow): opening = last year's audited closing; opening + movements = closing; formula cells not overwritten with typed numbers.
-- Revenue cycle (deep): each journal line on the AR schedule classified by the other side of its entry (Cr Revenue → credit sale, Dr Cash → receipt, Dr Allowance → write-off …); lines the rules can't place are classified by an agent and confirmed by the auditor. Two rollforwards — gross AR (opening + credit sales − receipts − credit notes − write-offs) and allowance for doubtful debts (opening + charge − write-offs used ± reversals). Journal entry tests (ISA 240). Unbalanced entries flagged first.
+- Revenue cycle (deep): each journal line on the AR schedule classified by the other side of its entry (Cr Revenue → credit sale, Dr Cash → receipt, Dr Allowance → write-off …); lines the rules can't place are classified by an agent and confirmed by the auditor. Two rollforwards — gross AR (opening + credit sales − receipts − credit notes − write-offs) and loss allowance (opening + charge − write-offs used ± reversals). Journal entry tests (ISA 240). Unbalanced entries flagged first.
 
 **Stage 2 — TB and cross-checks**
 - Every line-item schedule closing balance = TB.

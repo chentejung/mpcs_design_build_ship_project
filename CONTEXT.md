@@ -64,12 +64,12 @@ _Avoid_: Account item sheet, AR sheet, ledger extract
 A listing, separate from the journals, that substantiates a balance at customer or item level, such as the aged receivables listing.
 _Avoid_: Sheet, source sheet, subledger (unless it is literally one)
 
-**Allowance for doubtful debts**:
-The contra-asset deducted from gross receivables to present them net; it has its own rollforward (opening + charge − write-offs used ± reversals = closing), and its charge less reversals is the bad debt expense.
-_Avoid_: Provision of AR, bad debt provision (when meaning the balance, not the expense)
+**Loss allowance**:
+The IFRS 9 expected-credit-loss contra-asset deducted from gross receivables to present them net; it has its own rollforward (opening + charge − write-offs used ± reversals = closing), and its charge less reversals is the impairment loss on trade receivables (often labelled bad debt expense in client ledgers).
+_Avoid_: Allowance for doubtful debts (the IAS 39 incurred-loss term), provision of AR, bad debt provision (when meaning the balance, not the expense)
 
 **Cross-check**:
-A check that an amount on one line item agrees with an amount on another through the journal entries they share (e.g. AR credit sales against revenue, allowance charge against bad debt expense, AR receipts against cash).
+A check that an amount on one line item agrees with an amount on another through the journal entries they share (e.g. AR credit sales against revenue, loss allowance charge against impairment loss, AR receipts against cash).
 _Avoid_: Tie-out, cross-reference, reconciliation
 
 **Schedule template**:

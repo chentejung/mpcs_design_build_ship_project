@@ -1,0 +1,52 @@
+{
+  "client": "client-b",
+  "company": "Larkfield Components Ltd",
+  "settings": {
+    "performanceMateriality": 10000,
+    "clearlyTrivial": 500,
+    "yearEnd": "2026-12-31"
+  },
+  "outcome": "finished",
+  "plants": [
+    {
+      "id": "B1",
+      "description": "A cash sale of 35 is missing from the revenue schedule (clearly trivial, so the run continues).",
+      "flags": [
+        {
+          "stage": "tb-and-cross-checks",
+          "kind": "schedule-vs-tb",
+          "lineItem": "Revenue",
+          "difference": -35,
+          "ranking": "clearly-trivial",
+          "expected": 526015
+        }
+      ]
+    },
+    {
+      "id": "B2",
+      "description": "Trade receivables on the balance sheet typed as 87,560 instead of 78,560 (transposed digits); totals are correct.",
+      "flags": [
+        {
+          "stage": "statements",
+          "kind": "statement-amount",
+          "lineItem": "Trade receivables",
+          "difference": 9000,
+          "ranking": "between-thresholds",
+          "expected": 78560
+        }
+      ]
+    }
+  ],
+  "unplacedLines": [
+    {
+      "entry": "JE0083",
+      "description": "Clear suspense - remittance identified as Lim Trading",
+      "category": "receipt"
+    },
+    {
+      "entry": "JE0139",
+      "description": "Dishonoured cheque - Harbour Foods",
+      "category": "receipt"
+    }
+  ]
+}

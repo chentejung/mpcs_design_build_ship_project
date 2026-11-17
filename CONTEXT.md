@@ -108,7 +108,61 @@ _Avoid_: Gap, variance, break
 Any difference above the clearly trivial threshold in opening balances, line-item schedules, the trial balance or a cross-check means the client-prepared statements are not examined in that run; every such difference across all line items is still reported first.
 _Avoid_: Gate, blocker, halt
 
+### Engagements
+
+**Firm**:
+The audit firm a user belongs to; people join only by invitation, and every engagement belongs to exactly one firm.
+_Avoid_: Organisation, tenant, company (the client is a company too)
+
+**Cycle skill**:
+The instructions and permitted tools the AI model is given for one cycle's judgment tasks (e.g. classifying journal lines the rules can't place); it never computes amounts.
+_Avoid_: Agent, sub-agent, cycle agent
+
+**Engagement**:
+One audit of one client for one reporting year, with its own engagement team, accounting framework (locked once created), files and results.
+_Avoid_: Project, job, audit information, client (the client is the audited company, not the audit)
+
+**Engagement team**:
+The people allowed to work on an engagement, added by the engagement manager; each member is a preparer or a reviewer.
+_Avoid_: Audit team (when meaning the whole firm), members, users
+
+**Preparer**:
+An engagement team member who uploads files and runs cycle checks.
+_Avoid_: Staff, junior, user
+
+**Reviewer**:
+An engagement team member (senior, manager or partner) who signs off a cycle after its checks have run.
+_Avoid_: Approver, supervisor
+
+**Engagement files**:
+The inputs every cycle shares: the trial balance, the journal export, the client-prepared statements and last year's audited files.
+_Avoid_: Common files, global files, shared files
+
+**Journal export**:
+The client's full set of journal lines for the year, possibly delivered as one file per month, which together must cover every month of the reporting year exactly once.
+_Avoid_: GL dump, journals, ledger
+
+**Run**:
+One execution of a cycle's checks or of the statement examination, kept unchanged forever, recording who ran it, when, which file versions and thresholds it used, its outcome and its flags.
+_Avoid_: Job, execution, check (a check is one test within a run)
+
+**File version**:
+One upload of a file into its slot; a re-upload creates the next version and never deletes or overwrites earlier ones.
+_Avoid_: Revision, replacement, update
+
+**Disposition**:
+The preparer's recorded conclusion on one flag or fluctuation: corrected by client, explained and not a misstatement (with note and source), or possible misstatement carried to the summary.
+_Avoid_: Resolution, status, response
+
+**Sign-off**:
+A reviewer's approval of one specific run of a cycle, recording who, when and any comment; it requires a disposition on every flag and every fluctuation needing explanation, cannot be given by that run's preparer, and is cancelled by a new file version or a re-run.
+_Avoid_: Approval, review (review is the activity; sign-off is its recorded outcome)
+
 ### Auditing
+
+**Fluctuation**:
+The change in a line item's balance from last year's audited figure to this year's; one that exceeds both the percentage and the amount threshold needs an explanation from the auditor, but is not a difference and never triggers the stop rule.
+_Avoid_: Difference, variance, movement (movement is a rollforward category)
 
 **Performance materiality**:
 An amount the auditor enters for the engagement; flagged differences above it are ranked as most important.

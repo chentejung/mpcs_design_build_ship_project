@@ -96,6 +96,14 @@ _Avoid_: Client FS, management accounts, draft FS
 The auditor's independent recomputation of the financial statements from opening balances and the client's current-period data, used only as an expectation to compare against the client-prepared statements.
 _Avoid_: Draft financial statements, consolidated statements, expected statements
 
+**Proposed adjustment**:
+A correction the auditor accepts from a flag, written as a balanced journal entry for the client to post.
+_Avoid_: Audit adjustment (until the client has posted it), correction, AJE
+
+**Adjusted statements**:
+The client-prepared statements with every accepted proposed adjustment applied; the client reviews and adopts them as its own, so the auditor never becomes their preparer.
+_Avoid_: Audited statements (until the opinion is signed), final statements, draft statements
+
 **Flag**:
 A specific item the tool raises for the auditor to look into, linked to the entries or schedule rows that triggered it.
 _Avoid_: Alert, issue, exception (reserve for a procedure's findings)
@@ -114,13 +122,29 @@ _Avoid_: Gate, blocker, halt
 The audit firm a user belongs to; people join only by invitation, and every engagement belongs to exactly one firm.
 _Avoid_: Organisation, tenant, company (the client is a company too)
 
-**Cycle skill**:
-The instructions and permitted tools the AI model is given for one cycle's judgment tasks (e.g. classifying journal lines the rules can't place); it never computes amounts.
-_Avoid_: Agent, sub-agent, cycle agent
+**Orchestrator**:
+The agent the auditor talks to: when the auditor starts an audit, it checks every cycle's folder for its required files, starts the cycle agent of each cycle ready to run, runs the cross-checks that span cycles, applies the stop rule and assembles the results.
+_Avoid_: Main agent, master agent
+
+**Cycle agent**:
+The worker in charge of one cycle: it runs the cycle's checks and calls the line-item skill of each line item in the cycle; every amount comes from the checks, never from the agent.
+_Avoid_: Sub-agent, AR agent (an agent owns a cycle, not a line item)
+
+**Line-item skill**:
+The instructions and permitted tools the AI model is given for one line item's judgment tasks (e.g. classifying trade receivables journal lines the rules can't place); a cycle agent holds one per line item in its cycle.
+_Avoid_: Cycle skill, agent
 
 **Engagement**:
 One audit of one client for one reporting year, with its own engagement team, accounting framework (locked once created), files and results.
 _Avoid_: Project, job, audit information, client (the client is the audited company, not the audit)
+
+**Engagement folder**:
+The directory tree holding one engagement's files: a shared folder for engagement-wide files (trial balances, journal export, statements), one folder per cycle holding one folder per line item for that line item's schedules, and the record of every run.
+_Avoid_: Accounting structure, upload area, workspace
+
+**Run**:
+One examination of an engagement started by the auditor, recording which files it read and every result; never edited afterwards.
+_Avoid_: Job, execution, pass
 
 **Engagement team**:
 The people allowed to work on an engagement, added by the engagement manager; each member is a preparer or a reviewer.

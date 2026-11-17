@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { AuthCard, Field, Message, notConfigured, Submit } from "../components/AuthCard";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,8 +22,9 @@ export default function LoginPage() {
     });
     setBusy(false);
     if (error) return setError(error.message);
-    router.replace("/");
-    router.refresh();
+    // Full navigation: the router may hold a redirect to /login prefetched while signed out.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload resets the router cache after sign-in state changes
+    window.location.assign("/");
   }
 
   return (

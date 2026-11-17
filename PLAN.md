@@ -1,7 +1,7 @@
 # Project Plan — Audit Workbench (Design, Build, Ship, MPCS 51238)
 
 > Working plan for Audit Workbench, the only project in scope. **v1 due Tue Nov 17, 5:30 PM**; fair Dec 1. Proposal page: `proposal/index.html`.
-> Research: `research/idea1-audit.md`, `research/ifrs-isa-sources.md`. Vocabulary: `idea1-audit-workbench/GLOSSARY.md`. Decisions: `idea1-audit-workbench/docs/adr/`.
+> Research: `research/idea1-audit.md`, `research/ifrs-isa-sources.md`. Vocabulary: `CONTEXT.md`. Decisions: `docs/adr/`.
 
 ---
 
@@ -16,7 +16,7 @@ Long-term audience: **all auditors**, as clarified on Nov 6. Small external audi
 Every line item has its own movements, its own supporting schedules and its own column layouts. Inventory = opening + purchases − cost of sales ± adjustments − write-downs; cash, AR, inventory all come from completely different source sheets. Reconciling each one and spotting what doesn't make sense is slow, manual and repetitive.
 
 ## Ideal version (the ambition)
-An orchestrator with one agent per **cycle** examines a client's **client-prepared statements** (four statements plus notes) the way an auditor does: start from last year's audited figures, load the client's current-year data, check every line-item schedule and the TB, and only if those agree compare the client's Word statements — amounts and wording — against the auditor's **rebuilt statements**, last year's audited wording and the **client template** tailored from the firm's yearly **illustrative set**. Every difference becomes a ranked flag. Vocabulary: `idea1-audit-workbench/GLOSSARY.md`; key decision: `idea1-audit-workbench/docs/adr/0001-deterministic-numbers-agents-for-judgment.md`.
+An orchestrator with one agent per **cycle** examines a client's **client-prepared statements** (four statements plus notes) the way an auditor does: start from last year's audited figures, load the client's current-year data, check every line-item schedule and the TB, and only if those agree compare the client's Word statements — amounts and wording — against the auditor's **rebuilt statements**, last year's audited wording and the **client template** tailored from the firm's yearly **illustrative set**. Every difference becomes a ranked flag. Vocabulary: `CONTEXT.md`; key decision: `docs/adr/0001-deterministic-numbers-agents-for-judgment.md`.
 
 ## How it works (full design, agreed Nov 16)
 **Inputs** (single entity, continuing audits only, IFRS):

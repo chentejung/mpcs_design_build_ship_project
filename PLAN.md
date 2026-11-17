@@ -27,54 +27,61 @@ Long-term audience: **all auditors**, as clarified on Nov 6. Small external audi
 Every line item has its own movements, its own supporting schedules and its own column layouts. Inventory = opening + purchases − cost of sales ± adjustments − write-downs; cash, AR, inventory all come from completely different source sheets. Reconciling each one and spotting what doesn't make sense is slow, manual and repetitive.
 
 ### Ideal version (the ambition)
-Upload all of a client's journals and supporting schedules → the tool maps accounts to line items, rebuilds every statement and rollforward, compares against the client-prepared statements, runs fluctuation analysis, journal entry tests and plausibility checks on every line item, and produces a full Excel workpaper set plus a summary of where the auditor should look deeper — each flag linked to the procedure (ISA paragraph) and policy (IFRS paragraph) it relates to.
+An orchestrator with one agent per **cycle** examines a client's **client-prepared statements** (four statements plus notes) the way an auditor does: start from last year's audited figures, load the client's current-year data, check every line-item schedule and the TB, and only if those agree compare the client's Word statements — amounts and wording — against the auditor's **rebuilt statements**, last year's audited wording and the **client template** tailored from the firm's yearly **illustrative set**. Every difference becomes a ranked flag. Vocabulary: `idea1-audit-workbench/GLOSSARY.md`; key decision: `idea1-audit-workbench/docs/adr/0001-deterministic-numbers-agents-for-judgment.md`.
 
-### How it works (v1 scope: Revenue + AR)
-1. **Input**: journal entry export + supporting schedules for Revenue/AR in **fixed schedule templates** (sales register, cash receipts register, credit note register, write-off listing, aged AR listing), prior-year closing TB, and the **client-prepared TB**.
-2. **Account mapping**: AI suggests which client accounts belong to Revenue and AR; auditor confirms.
-3. **Rebuild**: lead schedule + AR rollforward (opening AR + credit sales − cash receipts − credit notes/returns − write-offs = closing AR). One currency; no FX in v1.
-4. **Compare**: rebuilt balances vs client-prepared TB, and each movement vs its supporting schedule → **unreconciled differences**.
-5. **Flags**:
-   - Fluctuation: monthly revenue/AR vs prior year beyond a performance-materiality threshold.
-   - Journal entry tests (ISA 240): revenue credited against accounts other than AR/cash; manual entries in last 5 days of the year; round amounts; weekend postings.
-   - Plausibility: returns % of sales vs prior year; DSO trend; cutoff (last-2-weeks sales vs shipping dates); subsequent receipts vs closing AR.
-6. **Output**: downloadable Excel (lead schedule, rollforward, flags tab linking to entries) + an AI-written bullet summary that only narrates rule-computed flags — never computes numbers.
-7. **Procedure library**: ~15 Revenue/AR procedures **I write**, tagged by line item, movement, assertion, ISA paragraph and IFRS paragraph (paraphrased + cited — IFRS/ISA text can't be reproduced in software without permission). Each flag links to the relevant procedures.
+### How it works (full design, agreed Nov 16)
+**Inputs** (single entity, continuing audits only, IFRS):
+- Last year's audited TB and audited statements (Word) → opening balances and last year's wording.
+- Client's current-year TB, full journal export with an entry number on every journal line (Excel), one **line-item schedule** per line item (Excel, fixed layout: journal lines + rollforward with formula cells), aged AR listing (Excel).
+- Client-prepared statements and notes (Word, one fixed template for synthetic clients).
+- Auditor enters performance materiality and clearly trivial threshold.
+
+**Stage 1 — line-item schedules**
+- Every line item (shallow): opening = last year's audited closing; opening + movements = closing; formula cells not overwritten with typed numbers.
+- Revenue cycle (deep): each journal line on the AR schedule classified by the other side of its entry (Cr Revenue → credit sale, Dr Cash → receipt, Dr Allowance → write-off …); lines the rules can't place are classified by an agent and confirmed by the auditor. Two rollforwards — gross AR (opening + credit sales − receipts − credit notes − write-offs) and allowance for doubtful debts (opening + charge − write-offs used ± reversals). Journal entry tests (ISA 240). Unbalanced entries flagged first.
+
+**Stage 2 — TB and cross-checks**
+- Every line-item schedule closing balance = TB.
+- Revenue-cycle cross-checks through shared entries: credit sales + cash sales (+ output VAT) = revenue split; allowance charge − reversals = bad debt expense; AR receipts = cash journal receipts.
+
+**Stop rule**: any difference above clearly trivial in Stages 1–2 (or opening balances) → report all of them across every line item, skip Stage 3. Re-run = re-upload the whole package; previous flags shown as resolved/unresolved.
+
+**Stage 3 — client-prepared statements**
+- Amounts on all four statements vs rebuilt statements (rounding tolerance for presented amounts).
+- Cash flow: net change in cash = change in balance-sheet cash; receivables line = AR rollforward; casts. Other lines marked "not examined".
+- Notes (revenue cycle + accounting policy): numbers in text match rebuilt figures; stale wording; three-way comparison against last year's audited wording and the client template (missing required item / conflicting wording / changed vs last year without template change → flags; same meaning → matched with agent's reasoning and quoted sentence).
+- Template version chosen by the client's year-end (e.g. IAS 1 for FY2026, IFRS 18 for periods beginning on/after 1 Jan 2027; early adoption marked by the auditor).
+
+**Output**: flags ranked against performance materiality and clearly trivial, each linked to the rows/entries/sentences behind it; Excel export.
+
+**Rule**: deterministic code computes every amount; agents only map, classify, compare wording and narrate (ADR 0001).
 
 ### Test data: synthetic companies
-Firms won't upload confidential data to a student app, so the tool is built and evaluated on **synthetic companies** from a deterministic double-entry engine: it posts balanced transactions, derives every supporting schedule from the same ledger (so they all tie), then injects **planted misstatements** recorded in an **answer key**. The LLM never touches numbers — only narrative (company backstory, descriptions).
+A deterministic double-entry engine generates two years of ledger per company (with VAT), every line-item schedule, the aged AR listing, last year's audited and this year's client-prepared statements in Word, planted misstatements and an answer key. The demo illustrative set is written by me (published illustrative sets are copyrighted and are only ever uploaded by a firm, never bundled or sent to a free-tier model).
 
-### Focus: AI — why
-The hard, valuable parts are judgment calls an LLM can help with and that can be measured against the answer key:
-- **Account mapping accuracy** vs the synthetic company's true mapping.
-- **Detection**: of N planted misstatements, how many are flagged; how many false flags.
-- **Summary faithfulness**: every number and claim in the summary traces to a computed flag; citations only from my procedure library.
-
-### How I'll know it works
-- Evals: mapping accuracy, detection rate and false-flag count across a set of synthetic companies.
-- 3 auditors run a synthetic case and tell me which flags they'd actually follow up on, and how long the same work takes them by hand.
+### Focus: Holistic Journey + AI — evals
+Plant at least one misstatement per stage: opening balance ≠ last year's audited; typed number over a formula; schedule movement ≠ journals; allowance charge ≠ bad debt expense; revenue credited to an unusual account; transposed digits on the statement face; stale year in a note; missing ageing table; conflicting policy wording. Measure detection and false flags per stage, whether the stop rule fired exactly when it should (and not for differences below clearly trivial), classification-agent accuracy vs true categories, and wording-agent accuracy on planted missing/conflicting items.
 
 ### Roadmap
-| Week | Build |
+| When | Build |
 |---|---|
-| Nov 10–17 → **v1** | Sign-up. Synthetic company engine for Revenue/AR (journals, 5 schedules, client TB, planted misstatements, answer key). Upload with fixed templates, parsed in the browser. Manual account mapping. Lead schedule + AR rollforward + client-TB comparison → unreconciled differences. Excel export. |
-| Nov 17–24 | All flags (fluctuation, JE tests, plausibility). AI account-mapping suggestions. Eval harness against answer keys. |
-| Nov 24–Dec 1 → **v2 (fair)** | AI summary. Procedure library linked from flags. A polished demo company for the fair. |
+| **v1 — due Tue Nov 17, 5:30 PM** | Live link. "Try the sample client" first run (or upload). Two scripted sample clients: A stops at Stage 2, B passes and has a transposed figure on its Word statements. Revenue cycle only: opening balances, gross AR rollforward, schedule vs TB, credit sales vs revenue cross-check, stop rule, Stage 3 amounts on balance sheet + income statement read from Word. Classification agent (Gemini, server-side key, spending limit). Flags list + Excel download. No sign-up, no database — files parsed in the browser. First task: ≤45-minute spike reading Word in the browser; fallback is statements in Excel. |
+| **v2 — Nov 18 → Dec 1 (fair)** | 1. Illustrative set upload + client template + three-way wording comparison for revenue-cycle notes and the accounting policy note. 2. Allowance rollforward + bad debt expense cross-check, cash cross-check, VAT. 3. Shallow checks for every line item; cash flow and equity statements; "not examined" coverage map. 4. Re-run with resolved flags. 5. Full synthetic engine + eval harness. 6. Sign-up + saved runs (Supabase with RLS). 7. AI summary. Priorities adjusted from v1 user tests. |
 
-**Out**: other line items (cash, inventory, …), bank statement matching, flexible column mapping for arbitrary client exports, IFRS 9 ECL allowance rollforward, FX, multi-entity/consolidation.
+**Out**: group consolidation, reading client formulas to explain differences, cutoff/shipping listing, recomputing expected credit loss rates, proposed adjustments list, re-running only the changed file, deep checks for cycles beyond revenue, FX, arbitrary client layouts, automatic template updates.
 
 ### Tech stack
-- **Next.js on Vercel** — one deploy for UI and server routes.
-- **Browser-side parsing (SheetJS)** — client files are read in the browser and never stored on a server.
-- **Supabase** — auth, synthetic companies, procedure library, saved mappings (no client data).
-- **Gemini free tier** — mapping suggestions and summary, **synthetic data only** (free-tier inputs may be used by Google; real client data must not be sent).
-- Excel output: SheetJS / ExcelJS.
-- MCP/CLIs: Supabase MCP, Vercel CLI, GitHub CLI.
+- **Next.js on Vercel** — UI and the one server route that calls the model.
+- **SheetJS** for Excel in the browser; a Word reader (to be chosen in the spike) for the client's statements.
+- **Gemini free tier** — synthetic data only; spending limit set before sharing the link.
+- **Supabase** — from v2 (auth, saved runs, illustrative sets), RLS on.
+- MCP/CLIs: Vercel CLI, GitHub CLI, Supabase MCP (v2).
 
 ### Risks
-- Scope: one line item end to end is already a lot — Revenue/AR only.
-- Real client exports vary wildly; v1 sidesteps with fixed templates.
-- Privacy: no real client data reaches the LLM or the database in v1.
+- One day for v1: keep it to the revenue cycle and two scripted sample clients.
+- Reading Word reliably: fixed template in v1; spike first.
+- Wording comparison is judgment: agent must quote the sentence it relied on; evaluated on planted items.
+- Copyright: illustrative sets and IFRS text are never bundled or sent to a free-tier model.
 
 ---
 
@@ -148,6 +155,7 @@ At least 3 per idea, before the page is final. Record their words.
 ---
 
 ## Decisions log
+- **Nov 16 design session (Audit Workbench):** multi-agent design agreed — orchestrator with one agent per cycle; full four-statement skeleton plus one deep cycle (revenue: Revenue, AR, allowance); deterministic code computes every number (ADR 0001); three stages with a stop rule before examining the client's Word statements; wording compared against last year's audited wording and a client template tailored from the firm's yearly illustrative set. "Consolidated" means group consolidation and stays out of scope. Workbook-formula understanding (Nov 6) becomes a later input mode. v1 scope cut to fit the Nov 17 deadline; see Roadmap.
 - **Nov 6 latest direction:** start with financial-statement draft automation through accounting skills and orchestration. Focus on understanding existing workbook rules/formulas, preserving calculation logic during source updates, and detecting anomalies. See `research/2026-11-06-drafting-assistant-direction.md`. Earlier Revenue/AR scope remains a possible first skill; it is not a complete specification for the newly chosen drafting outcome. Detailed scope and implementation remain pending.
 - **Nov 6 audience clarification:** the ambition is to serve all auditors. Small external audit firms can be the initial goal; the discovery form should include other auditor segments and analyze their needs separately. This does not expand the current Revenue/AR prototype scope automatically.
 - **Nov 3 update:** page now covers **Audit Workbench only** (Filing Analyzer kept here for reference, not on the page). Users: auditors. Focus: **Holistic Journey + AI** — AI gives suggestions for the initial financial analysis for auditors to inspect. Problem statement rewritten in my own words on the page.

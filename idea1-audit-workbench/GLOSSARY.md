@@ -6,9 +6,29 @@ A productivity tool that helps auditors plan and perform line-item-specific proc
 
 ### Financial statements
 
+**Financial statements**:
+The four primary statements (balance sheet, income statement, statement of changes in equity, cash flow statement) together with their notes, for a single entity.
+_Avoid_: Consolidated statements (reserve "consolidated" for combining a parent and subsidiaries, which is out of scope)
+
+**Note**:
+A section of the financial statements, beyond the primary statements, that explains a line item or policy in words and supporting tables (e.g. the trade receivables ageing note).
+_Avoid_: Sector, section, disclosure (when meaning the whole note)
+
+**Illustrative set**:
+A published or firm-owned model set of IFRS financial statements, uploaded by the auditor's firm each year and recording which standards it covers; never bundled with the tool.
+_Avoid_: Reference template, model accounts, template
+
+**Client template**:
+The illustrative set tailored to one client (notes that don't apply removed, client-specific notes added), carried forward from year to year; the client's notes are compared against it and against last year's audited wording.
+_Avoid_: Reference template, template
+
 **Line item**:
 A single caption on a financial statement (e.g. Revenue, Trade receivables).
-_Avoid_: Account (ambiguous with ledger account), FS item
+_Avoid_: Account (ambiguous with ledger account), account item, FS item
+
+**Cycle**:
+A group of related line items whose balances are moved by the same transactions, examined together (e.g. the revenue cycle covers Revenue, Trade receivables and their notes, because every credit sale moves both).
+_Avoid_: Account item, area, module
 
 **Accounting policy**:
 The framework rule (e.g. an IFRS requirement) that determines how a line item should be recognised, measured and presented.
@@ -28,9 +48,29 @@ _Avoid_: Roll-forward schedule, movement analysis, bridge
 One category of change within a rollforward, such as credit sales, cash receipts, returns or write-offs.
 _Avoid_: Add/deduct item, change, activity
 
+**Journal entry**:
+A balanced set of journal lines sharing one entry number (e.g. Dr Cash 100, Dr Accounts receivable 100, Cr Revenue 200).
+_Avoid_: Transaction, posting, record
+
+**Journal line**:
+One debit or credit to one ledger account within a journal entry.
+_Avoid_: Entry (when meaning one side only), record
+
+**Line-item schedule**:
+The client's sheet for one line item, listing every journal line that hit its accounts and its rollforward in a fixed layout, with formula cells showing how the client calculated the closing balance.
+_Avoid_: Account item sheet, AR sheet, ledger extract
+
 **Supporting schedule**:
-A listing that substantiates one movement or balance, such as a sales journal, cash receipts journal, credit note listing or aged receivables listing.
+A listing, separate from the journals, that substantiates a balance at customer or item level, such as the aged receivables listing.
 _Avoid_: Sheet, source sheet, subledger (unless it is literally one)
+
+**Allowance for doubtful debts**:
+The contra-asset deducted from gross receivables to present them net; it has its own rollforward (opening + charge − write-offs used ± reversals = closing), and its charge less reversals is the bad debt expense.
+_Avoid_: Provision of AR, bad debt provision (when meaning the balance, not the expense)
+
+**Cross-check**:
+A check that an amount on one line item agrees with an amount on another through the journal entries they share (e.g. AR credit sales against revenue, allowance charge against bad debt expense, AR receipts against cash).
+_Avoid_: Tie-out, cross-reference, reconciliation
 
 **Schedule template**:
 The expected column layout for one kind of supporting schedule; it differs by line item (a cash book looks nothing like an inventory movement report).
@@ -44,9 +84,17 @@ _Avoid_: Reconciled sheet, summary sheet
 The assignment of each client ledger account to the line item it rolls up into.
 _Avoid_: Classification, CoA mapping
 
+**Opening balances**:
+The balances at the start of the current period, carried forward from the prior year's audited closing position.
+_Avoid_: Beginning values, prior-year figures (those are the comparatives)
+
 **Client-prepared statements**:
-The trial balance and financial statements the client produced, which the tool independently rebuilds from journals and compares against.
-_Avoid_: Client FS, management accounts
+The trial balance and financial statements, including notes, that the client produced for the current period; the auditor examines these and does not prepare them.
+_Avoid_: Client FS, management accounts, draft FS
+
+**Rebuilt statements**:
+The auditor's independent recomputation of the financial statements from opening balances and the client's current-period data, used only as an expectation to compare against the client-prepared statements.
+_Avoid_: Draft financial statements, consolidated statements, expected statements
 
 **Flag**:
 A specific item the tool raises for the auditor to look into, linked to the entries or schedule rows that triggered it.
@@ -56,7 +104,19 @@ _Avoid_: Alert, issue, exception (reserve for a procedure's findings)
 The amount by which opening balance plus movements fails to equal the closing balance, or by which a movement fails to agree with its supporting schedule.
 _Avoid_: Gap, variance, break
 
+**Stop rule**:
+Any difference above the clearly trivial threshold in opening balances, line-item schedules, the trial balance or a cross-check means the client-prepared statements are not examined in that run; every such difference across all line items is still reported first.
+_Avoid_: Gate, blocker, halt
+
 ### Auditing
+
+**Performance materiality**:
+An amount the auditor enters for the engagement; flagged differences above it are ranked as most important.
+_Avoid_: Threshold, tolerance
+
+**Clearly trivial threshold**:
+An amount the auditor enters below which a difference is still flagged but ranked as clearly trivial.
+_Avoid_: De minimis, rounding (rounding tolerance is separate and only applies to presented amounts)
 
 **Assertion**:
 A claim management implicitly makes about a line item — existence/occurrence, completeness, valuation, rights and obligations, cutoff, presentation.

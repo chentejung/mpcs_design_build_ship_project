@@ -11,6 +11,8 @@
 //       and writes adjusted-statements.xlsx and .docx into the run folder.
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { AlignmentType, Document, HeadingLevel, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType } from "docx";
 import { fail, loadManifests, readEngagement, readJson, round2, same, sum } from "./lib/common.mjs";
 import { XLSX, parseAmount, readTable } from "./lib/excel.mjs";
@@ -126,4 +128,11 @@ if (cmd === "add") {
   console.log(JSON.stringify({ adjustments: new Set(adjustments.map((r) => r.adjustment)).size, presentationCorrections: corrections, outputs: ["adjusted-statements.xlsx", "adjusted-statements.docx"].map((f) => path.relative(process.cwd(), path.join(runDir, f))), totalsNotRecalculated: unexplained }, null, 2));
 } else {
   fail(`Unknown command "${cmd}".`);
+}
+
+// Refresh the engagement's status page so it shows the adjustments.
+try {
+  execFileSync(process.execPath, [path.join(path.dirname(fileURLToPath(import.meta.url)), "status.mjs"), engDir], { stdio: "ignore" });
+} catch {
+  /* the page is a view; adjustments are already saved */
 }

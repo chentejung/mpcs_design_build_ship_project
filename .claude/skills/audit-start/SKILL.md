@@ -1,6 +1,6 @@
 ---
 name: audit-start
-description: Runs an audit examination over an engagement folder as the orchestrator - finds which cycles have their files, dispatches each ready cycle agent, batches judgments for the auditor, applies the stop rule, compares the client-prepared statements, records the run and turns accepted flags into proposed adjustments and adjusted statements. Use when the auditor says "audit start", asks to examine or re-run an engagement, or has uploaded new files to an engagement folder.
+description: Runs an audit examination over an engagement folder as the orchestrator - finds which cycles have their files, dispatches each ready cycle agent, batches judgments for the auditor, applies the stop rule, compares the client-prepared statements, records the run and turns accepted flags into proposed adjustments and adjusted statements. Use when the auditor says "audit start" or "audit status", asks to examine or re-run an engagement or to see where it stands, or has uploaded new files to an engagement folder.
 ---
 
 # Audit start
@@ -42,7 +42,7 @@ The engagement folder is the auditor's argument, or the only folder under `engag
    - one line per flag above clearly trivial: line item, difference, explanation;
    - information still needed, judgments that need attention, and coverage gaps.
 
-   Point them to `workpapers.xlsx` for the full workpapers.
+   Point them to the status page (`<eng>/status.html`, refreshed by `finalize`) and to `workpapers.xlsx` for the full workpapers.
    _Done when_ the auditor has the outcome and every flag above clearly trivial.
 
 8. **Decisions and adjustments**, when the auditor accepts or rejects flags:
@@ -53,6 +53,17 @@ The engagement folder is the auditor's argument, or the only folder under `engag
 
    Then run `node $S/adjust.mjs apply <eng> $RID` and tell the auditor where the adjusted statements are.
    _Done when_ every flag the auditor decided on is in `dispositions.json`, and the adjusted statements reflect every accepted one.
+
+## Audit status
+
+When the auditor asks where the engagement stands ("audit status"), run `node $S/status.mjs <eng>` and give them the path to `<eng>/status.html`. Then summarise in three lines or fewer: the cycles' readiness, the latest run's outcome, and what awaits them. The page shows:
+- cycle readiness and missing files;
+- the latest run's outcome and coverage;
+- what awaits the auditor;
+- TB balance checks (rebuilt closing against the schedule, TB and aged listing for every line item);
+- rollforwards, difference analysis with explanations and decisions, provision matrix re-performance, the statements comparison, adjustments and run history.
+
+`finalize` and `adjust` refresh it automatically.
 
 ## Adding a cycle
 

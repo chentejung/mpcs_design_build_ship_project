@@ -216,7 +216,15 @@ XLSX.writeFile(wb, path.join(runDir, "workpapers.xlsx"));
 // ---------------------------------------------------------------------------
 // run.json: the run's permanent record
 // ---------------------------------------------------------------------------
-writeJson(path.join(runDir, "run.json"), { runId, completedAt: new Date().toISOString(), settings, stopped, cycles, files: scan, flags, judgments: reviews, coverage, notExamined, notes: cross.notes });
+writeJson(path.join(runDir, "run.json"), { runId, completedAt: new Date().toISOString(), settings, stopped, cycles, files: scan, flags, judgments: reviews, statements: statementsTable, coverage, notExamined, notes: cross.notes });
+
+// Refresh the engagement's status page (a view; a failure here never fails the run).
+let statusPage = null;
+try {
+  statusPage = execFileSync(process.execPath, [path.join(here, "status.mjs"), engDir], { encoding: "utf8" }).trim();
+} catch {
+  statusPage = null;
+}
 
 const count = (r) => flags.filter((f) => f.ranking === r).length;
-console.log(JSON.stringify({ runId, stopped, flags: flags.length, abovePerformanceMateriality: count("above-performance-materiality"), betweenThresholds: count("between-thresholds"), clearlyTrivial: count("clearly-trivial"), pendingClassifications: pendingAll.length, infoNeeded: info, outputs: ["flags.md", "workpapers.xlsx", "run.json"].map((f) => path.relative(process.cwd(), path.join(runDir, f))) }, null, 2));
+console.log(JSON.stringify({ runId, stopped, flags: flags.length, abovePerformanceMateriality: count("above-performance-materiality"), betweenThresholds: count("between-thresholds"), clearlyTrivial: count("clearly-trivial"), pendingClassifications: pendingAll.length, infoNeeded: info, outputs: ["flags.md", "workpapers.xlsx", "run.json"].map((f) => path.relative(process.cwd(), path.join(runDir, f))), statusPage }, null, 2));

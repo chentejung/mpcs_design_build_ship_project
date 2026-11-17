@@ -129,7 +129,24 @@ Flags: 0 above performance materiality · 7 between thresholds · 3 clearly triv
 
 **Decisions and adjustments.** Tell the orchestrator which flags you accept or reject; a rejection needs a reason. For accepted flags it drafts balanced proposed adjustments (accounts suggested, amount from the flag), for example "ADJ-1 Dr 1000 Cash 5,490 / Cr 1100 Trade receivables 5,490". After you confirm, it produces the adjusted statements. Accepting a figure mistyped on the statements is a presentation correction and needs no journal entry.
 
-## 5. Output
+## 5. Status page
+
+Every engagement has a status page, `engagements/<client>-<FYE>/status.html`; open it in any browser, no server needed. It is refreshed at the end of every run and after adjustments; say "audit status" (or run `node .claude/skills/audit-start/scripts/status.mjs <engagement-folder>`) to refresh it at any other time, for example after uploading files.
+
+| Section | Shows |
+|---|---|
+| Status | Each cycle: ready, unchanged since the last run, missing files (named), column problems; a run still in progress |
+| Latest run | Outcome (stopped by the stop rule or finished), flag counts by rank, links to `flags.md`, `workpapers.xlsx` and the adjusted statements, coverage by line item |
+| Awaiting the auditor | Account mappings to confirm, journal lines to classify (with the other side of each entry), information needed from the client, judgments needing attention, flags above clearly trivial without a decision |
+| TB balance checks | For every line item: audited opening, the year's journal movements, rebuilt closing, and the client's schedule, TB and aged listing closings, with each difference coloured by rank |
+| Rollforwards | Each movement, rebuilt against the client's schedule |
+| Difference analysis | Every flag: expected, actual, difference, assertion, reference, the explanation, the scripted explanations tested (✓ where one matches), sources, and your decision |
+| Provision matrix re-performance | Each bucket: re-aged listing gross against the matrix, rates, re-performed and client allowance, against the ledger |
+| Statements | Client-prepared figures against the rebuilt figures and last year's audited comparatives (when examined) |
+| Adjustments and decisions | Proposed adjustments and every accept/reject decision with its reason |
+| Run history | Every run with its outcome and flag counts |
+
+## 6. Output
 
 Each run writes `engagements/<client>-<FYE>/runs/<timestamp>/`. The folder is never changed once complete.
 
@@ -142,11 +159,11 @@ Each run writes `engagements/<client>-<FYE>/runs/<timestamp>/`. The folder is ne
 
 These engagement-level files carry over between runs: `adjustments.xlsx`, `dispositions.json` (your decisions and reasons), and the mapping and confirmation files.
 
-## 6. Re-running
+## 7. Re-running
 
 Upload a corrected or new file into its folder and say "audit start" again. Only cycles whose files changed run again; unchanged cycles reuse their last results, and earlier decisions appear next to the matching flags.
 
-## 7. What is checked
+## 8. What is checked
 
 | Area | Depth |
 |---|---|
@@ -155,7 +172,7 @@ Upload a corrected or new file into its folder and say "audit start" again. Only
 | Statement of financial position and statement of profit or loss | Compared with the rebuilt figures when the stop rule does not fire |
 | Statement of cash flows, statement of changes in equity, notes | Not examined yet |
 
-## 8. Checking the scripts
+## 9. Checking the scripts
 
 After a run on a sample engagement, compare its flags with the answer key:
 

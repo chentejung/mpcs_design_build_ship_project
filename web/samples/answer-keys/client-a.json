@@ -1,0 +1,66 @@
+{
+  "client": "client-a",
+  "company": "Kestrel Supplies Ltd",
+  "settings": {
+    "performanceMateriality": 10000,
+    "clearlyTrivial": 500,
+    "yearEnd": "2026-12-31"
+  },
+  "outcome": "stopped",
+  "plants": [
+    {
+      "id": "A1",
+      "description": "A December receipt of 7,800 is missing from the trade receivables schedule, so its closing balance is 7,800 higher than the TB.",
+      "flags": [
+        {
+          "stage": "tb-and-cross-checks",
+          "kind": "schedule-vs-tb",
+          "lineItem": "Trade receivables",
+          "difference": 7800,
+          "ranking": "between-thresholds",
+          "expected": 58070
+        }
+      ]
+    },
+    {
+      "id": "A2",
+      "description": "Revenue of 12,000 credited against Other payables (not trade receivables or cash) as a year-end adjustment.",
+      "flags": [
+        {
+          "stage": "tb-and-cross-checks",
+          "kind": "revenue-unusual-account",
+          "lineItem": "Revenue",
+          "difference": 12000,
+          "ranking": "above-performance-materiality",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "A3",
+      "description": "A cash sale of 40 is missing from the revenue schedule (clearly trivial).",
+      "flags": [
+        {
+          "stage": "tb-and-cross-checks",
+          "kind": "schedule-vs-tb",
+          "lineItem": "Revenue",
+          "difference": -40,
+          "ranking": "clearly-trivial",
+          "expected": 491960
+        }
+      ]
+    }
+  ],
+  "unplacedLines": [
+    {
+      "entry": "JE0079",
+      "description": "Clear suspense - remittance identified as Lim Trading",
+      "category": "receipt"
+    },
+    {
+      "entry": "JE0135",
+      "description": "Dishonoured cheque - Harbour Foods",
+      "category": "receipt"
+    }
+  ]
+}

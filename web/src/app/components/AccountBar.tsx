@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -8,7 +7,6 @@ type Profile = { full_name: string; employee_id: string; email: string };
 
 /** Shows who is signed in (name and employee ID) with a log-out button. */
 export function AccountBar() {
-  const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
@@ -24,8 +22,9 @@ export function AccountBar() {
 
   async function logOut() {
     await createClient()?.auth.signOut();
-    router.replace("/login");
-    router.refresh();
+    // Full navigation so no signed-in page stays in the client router cache.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload resets the router cache after sign-in state changes
+    window.location.assign("/login");
   }
 
   if (!profile) return null;

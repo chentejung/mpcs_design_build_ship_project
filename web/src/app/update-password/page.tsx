@@ -1,12 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { AuthCard, Field, Message, notConfigured, Submit } from "../components/AuthCard";
 
 export default function UpdatePasswordPage() {
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,8 +18,8 @@ export default function UpdatePasswordPage() {
     const { error } = await supabase.auth.updateUser({ password: String(form.get("password")) });
     setBusy(false);
     if (error) return setError(error.message);
-    router.replace("/");
-    router.refresh();
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload resets the router cache after sign-in state changes
+    window.location.assign("/");
   }
 
   return (

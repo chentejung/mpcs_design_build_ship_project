@@ -1,0 +1,11 @@
+{
+  "name": "audit-start-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic scripts for the audit-start skill: every amount in an examination is computed here.",
+  "dependencies": {
+    "docx": "^9.15.4",
+    "mammoth": "^1.13.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  }
+}

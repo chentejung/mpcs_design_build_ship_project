@@ -1,0 +1,109 @@
+# Engagement folder: layout, schedule templates and side files
+
+The scripts read only what this page describes. The manifests in `../cycles/*.json` are the source of truth for which files each cycle needs and their columns; this page explains them for the auditor.
+
+## Layout
+
+```
+engagements/<client>-<FYE>/
+  engagement.md                 settings (below)
+  shared/
+    prior-year-tb.xlsx          last year's audited TB, before closing entries
+    current-tb.xlsx             the client's current TB, before closing entries
+    journals/                   the full-year journal export: one .xlsx or one per month
+    prior-year-statements.docx  last year's audited statements
+    client-statements.docx      this year's client-prepared statements
+    account-map.json            confirmed account mapping (written after the auditor confirms)
+    column-map.json             confirmed column names for shared files (optional)
+  revenue/                      the revenue cycle
+    trade-receivables/          schedule.xlsx, aged-listing.xlsx, provision-matrix.xlsx (optional)
+    revenue/                    schedule.xlsx
+    impairment-loss/            (no files needed: checked from the TB and journals)
+  adjustments.xlsx              proposed adjustments (written by adjust.mjs)
+  dispositions.json             the auditor's accept/reject decisions on flags
+  runs/<run-id>/                one folder per run; permanent once run.json exists
+```
+
+Files must carry the template name (e.g. `schedule.xlsx`). When the auditor uploads a file under another name and it is plainly the same document, offer to rename it.
+
+## engagement.md
+
+```markdown
+# Engagement
+
+- Client: Harbour Trading Ltd
+- Year-end: 2026-12-31
+- Period start: 2026-01-01
+- Framework: IAS 1            (or IFRS 18; IFRS 18 applies to periods beginning on or after 1 Jan 2027 unless early adopted)
+- Performance materiality: 15000
+- Clearly trivial: 750
+```
+
+## Schedule templates
+
+Column names below are what the scripts expect. A client file with different headers works once the auditor confirms a column map.
+
+| File | Sheet | Columns |
+|---|---|---|
+| `prior-year-tb.xlsx`, `current-tb.xlsx` | Trial balance | Account, Account name, Debit, Credit, optional Line item |
+| `journals/*.xlsx` | Journal lines | Entry number, Date, Account, Account name, Description, Debit, Credit |
+| `revenue/trade-receivables/schedule.xlsx` | Journal lines | as journals: every line posted to the receivables and allowance accounts |
+| | Rollforward | Movement, Amount |
+| | Allowance rollforward (if an allowance exists) | Movement, Amount |
+| `revenue/trade-receivables/aged-listing.xlsx` | Aged listing | Customer, Invoice number, Invoice date, Due date, Outstanding, optional Bucket |
+| `revenue/trade-receivables/provision-matrix.xlsx` | Provision matrix | Bucket, Gross, Rate, Allowance |
+| | Individually assessed (optional) | Customer, Gross, Allowance |
+| `revenue/revenue/schedule.xlsx` | Journal lines | as journals: every line posted to revenue |
+| | Rollforward | Movement, Amount |
+
+A workbook with a single sheet is read whatever the sheet is called.
+
+**Movement labels.** Amounts that reduce the balance are shown positive and deducted; FX, reclassifications and other are signed.
+
+- Gross trade receivables: Opening balance, Credit sales, Cash receipts, Credit notes, Write-offs, Foreign exchange, Reclassifications, Closing balance.
+- Loss allowance (shown as a positive balance): Opening balance, Impairment charge, Reversals, Write-offs used, Foreign exchange, Closing balance.
+- Revenue: Opening balance (nil), Credit sales, Cash sales, Credit notes, Other, Closing balance.
+
+The closing balance should be a formula; a typed number is reported as a possible explanation when a difference exists.
+
+**Ageing buckets** (days past due at the year-end): Not yet due, 1-30 days, 31-60 days, 61-90 days, Over 90 days. Client labels such as "Current" or "91+" are recognised. Rates may be decimals (0.05) or percentages (5%).
+
+## Side files (written only after the auditor confirms)
+
+`shared/account-map.json`: each account's line item and, for trade receivables, its component.
+```json
+{ "accounts": {
+  "1100": { "lineItem": "Trade receivables", "component": "gross", "confirmed": true },
+  "1150": { "lineItem": "Trade receivables", "component": "loss-allowance", "confirmed": true }
+} }
+```
+Accounts not listed take the TB's "Line item" column. Trade receivables accounts always need a confirmed component.
+
+`<folder>/column-map.json`: template column → the client's header, per file (`"journals"` covers every file in `shared/journals/`).
+```json
+{ "schedule.xlsx": { "Entry number": "Doc No.", "Description": "Narrative" } }
+```
+
+`revenue/trade-receivables/confirmations.json`: the auditor's category for each line no rule could place, keyed by the line id the script reported.
+```json
+{ "lines": {
+  "JE0156|1100|1250.00": { "category": "credit-sale", "confirmedBy": "auditor", "suggestion": "credit-sale", "reasoning": "Invoice re-booked from suspense; agreed to the signed invoice." }
+} }
+```
+Categories: gross lines use credit-sale, receipt, credit-note, write-off, fx, reclassification; allowance lines use charge, reversal, write-off-used, fx.
+
+`dispositions.json`: the auditor's decision on each flag, keyed by the flag key shown in `flags.md`.
+```json
+{ "schedule-vs-tb|Trade receivables|Gross trade receivables|": { "decision": "accepted", "reason": "Receipt JE0115 missing from the schedule", "adjustment": "ADJ-1", "run": "2026-11-17T21-59-26" } }
+```
+
+Proposed adjustments are passed to `adjust.mjs add` as JSON (amounts from the flag, accounts confirmed by the auditor):
+```json
+[{ "adjustment": "ADJ-1", "flag": "<flag key>", "description": "Record receipt JE0115 omitted from the schedule",
+   "lines": [{ "account": "1000", "debit": 5490 }, { "account": "1100", "credit": 5490 }] }]
+```
+A flag on a figure typed wrongly on the statements (`statement-amount`) needs no journal entry: accepting it in `dispositions.json` makes `adjust.mjs apply` correct that figure as a presentation correction.
+
+## Run outputs
+
+`runs/<run-id>/work/` holds each cycle's results (`<cycle>.json`), its narratives (`<cycle>-narratives.json`: flag key → text) and judgments (`<cycle>-review.json`: `{ "items": [{ "topic", "lineItem", "conclusion", "concern" }] }`), plus `cross-cycle.json` and `orchestrator-narratives.json`. `finalize.mjs` turns these into `flags.md`, `workpapers.xlsx` and `run.json`; `adjust.mjs apply` adds `adjusted-statements.xlsx` and `.docx`.

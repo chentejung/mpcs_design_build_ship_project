@@ -43,7 +43,7 @@ flowchart LR
     RV --> RV1["schedule.xlsx<br/>column-map.json · confirmations.json"]
     IL --> IL1["schedule.xlsx<br/>column-map.json · confirmations.json"]
 
-    TRE --> CASH["cash/<br/>(line item, shallow)"]
+    TRE --> CASH["cash/<br/>(future cycle; until then shallow-checked<br/>from the shared files)"]
 
     RUNS --> RUN["timestamp/"]
     RUN --> R1["flags.md<br/>ranked flags"]
@@ -65,7 +65,7 @@ Legend: blue = uploaded or set by the auditor · amber = written by an agent aft
 
 ## 2. Harness files in the repo
 
-Where the skills, agents, manifests and scripts live. Adding a cycle means adding one agent, its manifest and its line-item skills; the orchestrator does not change.
+Where the skills, agents, manifests and scripts live (as built). Adding a cycle means adding a manifest, a cycle script, one agent and its line-item skills; the orchestrator does not change. Manifests are JSON inside the orchestrator skill because the scripts read them too, and all scripts share one Node package.
 
 ```mermaid
 flowchart LR
@@ -74,15 +74,18 @@ flowchart LR
     CL --> SK["skills/"]
     CL --> AG["agents/"]
 
-    SK --> AS["audit-start/<br/>SKILL.md (orchestrator)<br/>scripts: scan folder · hash files ·<br/>cross-cycle checks · stop rule ·<br/>statements compare · write run ·<br/>apply adjustments"]
-    SK --> TR["trade-receivables/<br/>SKILL.md (line-item skill)<br/>ifrs-rules.md · procedures.md<br/>scripts: rollforwards · provision matrix ·<br/>difference candidates"]
+    SK --> AS["audit-start/<br/>SKILL.md (orchestrator)<br/>references/engagement-folder.md"]
+    AS --> CY["cycles/<br/>shared.json · revenue.json<br/>(manifests: line items, required files,<br/>schedule templates)"]
+    AS --> SC["scripts/ (Node + SheetJS, mammoth, docx)<br/>scan · run · cross-cycle (incl. shallow checks) ·<br/>finalize (stop rule, statements, run record) · adjust"]
+    SC --> SCC["scripts/cycles/revenue.mjs<br/>rollforwards · aged listing · provision matrix ·<br/>revenue · cross-checks · difference candidates"]
+    SC --> LIB["scripts/lib/<br/>column map reader · TB, journals, account map ·<br/>Word statements · flags and ranking"]
+    SC --> DEV["scripts/dev/<br/>fixture generator · answer-key checker"]
+    SK --> TR["trade-receivables/<br/>SKILL.md (line-item skill)<br/>references/ifrs-rules.md · procedures.md"]
     SK --> RS["revenue/<br/>SKILL.md (line-item skill)"]
     SK --> IS["impairment-loss/<br/>SKILL.md (line-item skill)"]
-    SK --> SHL["shared scripts<br/>read files via column map ·<br/>shallow line-item check ·<br/>flag ranking · package.json (SheetJS,<br/>mammoth, docx)"]
 
     AG --> RCA["revenue-cycle.md<br/>(cycle agent)"]
-    AG --> RCM["revenue-cycle/cycle.md<br/>(manifest: line items,<br/>required files, schedule templates,<br/>cross-checks)"]
-    AG --> MORE["… one agent + manifest per cycle"]
+    AG --> MORE["… one agent per cycle"]
 ```
 
 ---
@@ -99,7 +102,7 @@ flowchart TB
         O1["Read engagement.md<br/>+ every cycle manifest"]
         O2["Scan engagement folder:<br/>missing · unchanged · new or changed"]
         O3["Batch pending judgments<br/>for the auditor"]
-        O4["Cross-cycle checks<br/>+ stop rule"]
+        O4["Cross-cycle checks · shallow check for<br/>line items no cycle examined · stop rule"]
         O5["Compare client-prepared statements<br/>with rebuilt statements"]
         O6["Write run · draft proposed<br/>adjustments · adjusted statements"]
     end
@@ -114,8 +117,8 @@ flowchart TB
         end
     end
 
-    subgraph OC["Other cycle agents"]
-        X1["Shallow check per line item<br/>opening = PY audited closing ·<br/>schedule closing = TB"]
+    subgraph OC["Other cycle agents (as cycles are added)"]
+        X1["Their own cycle scripts<br/>and line-item skills"]
     end
 
     subgraph SCR["Scripts (Node + SheetJS) — every amount"]

@@ -54,14 +54,16 @@ Indicators to search for in the journals and listing:
 
 Applies when the client measures the loss allowance with a provision matrix (IFRS 9.B5.5.35). If it uses another method, record which one and test it under § Valuation instead.
 
-**Re-performance**. These checks are arithmetic: compute each one with a script, and flag any difference above CT.
+**Re-performance**. These checks are arithmetic, and `audit-start/scripts/cycles/revenue.mjs` computes them (flag kinds in brackets); read their results from the run, never recompute them:
 
 | Check | Computation |
 |---|---|
-| Matrix ties to the listing | Each bucket's gross balance in the matrix = that bucket's total in the aged listing; sum of buckets = gross AR in the GL |
-| Allowance re-performed | Σ (bucket balance × bucket rate) + individually assessed allowance = loss allowance in the GL |
-| No double counting | Balances assessed individually as credit-impaired appear in no matrix bucket |
-| Disclosure agrees | IFRS 7.35N table (bucket, rate, gross amount, allowance) = the re-performed matrix |
+| Matrix ties to the listing (`matrix-bucket-gross`) | Each bucket's gross balance in the matrix = that bucket's total in the aged listing re-aged from due dates, individually assessed customers and credit balances excluded |
+| Matrix arithmetic (`matrix-arithmetic`) | Each bucket's allowance = gross × rate |
+| Allowance re-performed (`allowance-vs-matrix`) | Σ (re-aged bucket balance × client's rate) + individually assessed allowance = loss allowance in the GL |
+| Client's own total (`matrix-total-vs-ledger`) | The client's matrix total = the loss allowance in the GL |
+| No double counting (`individually-assessed-in-matrix` explanation) | Balances assessed individually appear in no matrix bucket |
+| Disclosure agrees (not yet scripted; notes are not examined) | IFRS 7.35N table (bucket, rate, gross amount, allowance) = the re-performed matrix |
 
 **Rate judgment**. Assess each of these and report it as a flag with your reasoning, or as "assessed, reasonable" with the evidence used:
 

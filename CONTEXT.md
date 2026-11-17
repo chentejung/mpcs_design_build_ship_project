@@ -112,6 +112,10 @@ _Avoid_: Alert, issue, exception (reserve for a procedure's findings)
 The amount by which opening balance plus movements fails to equal the closing balance, or by which a movement fails to agree with its supporting schedule.
 _Avoid_: Gap, variance, break
 
+**Coverage**:
+How deeply each statement line was examined in a run: deep (rebuilt from journals by a cycle's checks), shallow (only opening, movements, closing and TB agreement) or not examined.
+_Avoid_: Scope, completeness
+
 **Stop rule**:
 Any difference above the clearly trivial threshold in opening balances, line-item schedules, the trial balance or a cross-check means the client-prepared statements are not examined in that run; every such difference across all line items is still reported first.
 _Avoid_: Gate, blocker, halt

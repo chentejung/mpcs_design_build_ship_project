@@ -1,5 +1,9 @@
 #!/usr/bin/env node
-// Usage: node status.mjs <engagement-folder>
+// Usage: node status.mjs <engagement-folder> [--live] [--open]
+//   --live  the page reloads itself every 10 seconds (used while a run is in progress; finalize
+//           writes the final page without it, which ends the reloading)
+//   --open  serves the folder on localhost (serve.mjs) and opens the page in the browser: through
+//           VS Code's $BROWSER helper when connected remotely, else open / xdg-open / start
 //
 // Writes <engagement-folder>/status.html: one page showing the engagement's current status and the
 // latest run's results: cycle readiness, what awaits the auditor, TB balance checks, rollforwards,
@@ -7,12 +11,17 @@
 // it reads the scan, the runs and the side files, computes nothing new, and is safe to rerun.
 import fs from "node:fs";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
+import http from "node:http";
 import { fileURLToPath } from "node:url";
 import { RANK_ORDER, fail, lastCompletedRun, readEngagement, readJson, round2 } from "./lib/common.mjs";
 import { parseAmount, readTable } from "./lib/excel.mjs";
 
-const engDir = path.resolve(process.argv[2] ?? fail("Usage: node status.mjs <engagement-folder>"));
+const args = process.argv.slice(2);
+const live = args.includes("--live");
+const openPage = args.includes("--open");
+const engArg = args.find((a) => !a.startsWith("--"));
+const engDir = path.resolve(engArg ?? fail("Usage: node status.mjs <engagement-folder> [--live] [--open]"));
 if (!fs.existsSync(engDir)) fail(`No such folder: ${engDir}`);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const { settings } = readEngagement(engDir);
@@ -84,7 +93,17 @@ if (scan) {
   const unexpected = [...scan.sharedUnexpectedFiles, ...scan.cycles.flatMap((c) => c.lineItems.flatMap((li) => li.unexpectedFiles))];
   if (unexpected.length) statusBody += `<p class="muted">Files not in any template (rename if they are a template file): ${esc(unexpected.join(", "))}</p>`;
 }
-if (inProgress.length) statusBody += `<p class="warn">Run ${esc(inProgress.at(-1))} is in progress (not finalized); results below are from the last completed run.</p>`;
+if (inProgress.length) {
+  const id = inProgress.at(-1);
+  const wd = path.join(runsDir, id, "work");
+  const done = fs.existsSync(wd) ? fs.readdirSync(wd) : [];
+  const steps = [
+    ...(scan?.cycles ?? []).map((c) => `${c.name}: ${done.includes(`${c.id}.json`) ? (done.includes(`${c.id}-narratives.json`) ? "checked and explained" : "checked, explanations pending") : c.status === "ready" || c.status === "unchanged" ? "running" : "not run"}`),
+    `Cross-cycle checks: ${done.includes("cross-cycle.json") ? "done" : "pending"}`,
+    "Finalize: pending",
+  ];
+  statusBody += `<p class="warn">Run ${esc(id)} is in progress. ${esc(steps.join(" · "))}.${lastId ? " The results below are from the last completed run." : ""}</p>`;
+}
 section("status", "Status", statusBody);
 
 // ---------------------------------------------------------------------------
@@ -226,7 +245,7 @@ section(
 // ---------------------------------------------------------------------------
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(settings.client)} — engagement status</title>
+<title>${esc(settings.client)} — engagement status</title>${live ? `\n<meta http-equiv="refresh" content="10">` : ""}
 <style>
 :root { --fg:#1f2328; --muted:#656d76; --bg:#ffffff; --panel:#f6f8fa; --line:#d0d7de; --ok:#1a7f37; --warn:#9a6700; --bad:#cf222e; --trivial:#656d76; }
 @media (prefers-color-scheme: dark) { :root { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --panel:#161b22; --line:#30363d; --ok:#3fb950; --warn:#d29922; --bad:#f85149; --trivial:#9198a1; } }
@@ -257,7 +276,7 @@ details { margin:4px 0; } summary { cursor:pointer; color:var(--muted); }
 </style></head>
 <body>
 <header><h1>${esc(settings.client)}</h1>
-<div class="muted">Year ended ${esc(settings.yearEnd)} · ${esc(settings.framework)} · performance materiality ${money(pm)} · clearly trivial ${money(ct)} · page generated ${esc(new Date().toISOString().replace("T", " ").slice(0, 16))} UTC</div></header>
+${live ? `<div class="warn"><b>Live:</b> this page reloads every 10 seconds while the examination runs.</div>` : ""}<div class="muted">Year ended ${esc(settings.yearEnd)} · ${esc(settings.framework)} · performance materiality ${money(pm)} · clearly trivial ${money(ct)} · page generated ${esc(new Date().toISOString().replace("T", " ").slice(0, 16))} UTC</div></header>
 <nav>${sections.map((s) => `<a href="#${s.id}">${esc(s.title.replace(/:.*/, ""))}</a>`).join("")}</nav>
 <main>
 ${sections.map((s) => `<section id="${s.id}"><h2>${esc(s.title)}</h2>${s.body}</section>`).join("\n")}
@@ -265,4 +284,63 @@ ${sections.map((s) => `<section id="${s.id}"><h2>${esc(s.title)}</h2>${s.body}</
 </main></body></html>
 `;
 fs.writeFileSync(path.join(engDir, "status.html"), html);
-console.log(path.relative(process.cwd(), path.join(engDir, "status.html")) || "status.html");
+const pagePath = path.relative(process.cwd(), path.join(engDir, "status.html")) || "status.html";
+if (!openPage) {
+  console.log(pagePath);
+} else {
+  const url = await serveUrl();
+  const opened = url ? openInBrowser(url) : null;
+  console.log(JSON.stringify({ page: pagePath, url, opened: opened ?? false, note: opened ? `Opened with ${opened}.` : url ? "No browser opener available here; open the URL yourself (VS Code forwards the port)." : "Could not start the local server; open the file directly." }, null, 2));
+}
+
+/** A running serve.mjs for this folder (reused if alive), as http://localhost:<port>/status.html. */
+async function serveUrl() {
+  const stateFile = path.join(engDir, ".status-server.json");
+  const alive = async (st) => {
+    if (!st?.pid || !st?.port) return false;
+    try {
+      process.kill(st.pid, 0);
+    } catch {
+      return false;
+    }
+    return new Promise((resolve) => {
+      const req = http.request({ host: "127.0.0.1", port: st.port, path: "/status.html", method: "HEAD", timeout: 1000 }, (res) => resolve(res.statusCode === 200));
+      req.on("error", () => resolve(false));
+      req.on("timeout", () => {
+        req.destroy();
+        resolve(false);
+      });
+      req.end();
+    });
+  };
+  let st = readJson(stateFile, null);
+  if (!(await alive(st))) {
+    try {
+      fs.rmSync(stateFile, { force: true });
+    } catch {
+      /* ignore */
+    }
+    spawn(process.execPath, [path.join(here, "serve.mjs"), engDir], { detached: true, stdio: "ignore" }).unref();
+    for (let i = 0; i < 30 && !(await alive((st = readJson(stateFile, null)))); i++) await new Promise((r) => setTimeout(r, 100));
+    if (!(await alive(st))) return null;
+  }
+  return `http://localhost:${st.port}/status.html`;
+}
+
+/** Opens a URL in the user's browser; returns the opener used, or null. */
+function openInBrowser(url) {
+  const candidates = [];
+  if (process.env.BROWSER) candidates.push([process.env.BROWSER, [url]]);
+  if (process.platform === "darwin") candidates.push(["open", [url]]);
+  else if (process.platform === "win32") candidates.push(["cmd", ["/c", "start", "", url]]);
+  else if (process.env.DISPLAY || process.env.WAYLAND_DISPLAY) candidates.push(["xdg-open", [url]]);
+  for (const [cmd, a] of candidates) {
+    try {
+      execFileSync(cmd, a, { stdio: "ignore", timeout: 10000 });
+      return path.basename(cmd);
+    } catch {
+      /* try the next opener */
+    }
+  }
+  return null;
+}

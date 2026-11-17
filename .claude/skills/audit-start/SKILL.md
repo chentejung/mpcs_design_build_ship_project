@@ -20,6 +20,8 @@ The engagement folder is the auditor's argument, or the only folder under `engag
 
 ## Steps
 
+0. **Open the status page.** `node $S/status.mjs <eng> --open --live`, before anything else. This serves the folder on localhost and opens `status.html` in the auditor's browser (through VS Code's port forwarding when they are connected remotely). Tell the auditor the URL it prints; if `opened` is false, ask them to open the URL themselves. In live mode the page reloads every 10 seconds, so refresh it with `node $S/status.mjs <eng> --live` after each step below, and it follows the run.
+
 1. **Scan.** `node $S/scan.mjs <eng>`. Tell the auditor, per cycle: ready, unchanged since the last run, or not runnable, naming every missing file (with its description from the scan) and every column problem. Offer to rename unexpected files that are plainly a template file under another name. If `settingsProblems` is not empty, ask the auditor to fix `engagement.md` and stop.
    _Done when_ every cycle has a status the auditor has seen, and every problem the scan reported has been put to them.
 
@@ -56,14 +58,14 @@ The engagement folder is the auditor's argument, or the only folder under `engag
 
 ## Audit status
 
-When the auditor asks where the engagement stands ("audit status"), run `node $S/status.mjs <eng>` and give them the path to `<eng>/status.html`. Then summarise in three lines or fewer: the cycles' readiness, the latest run's outcome, and what awaits them. The page shows:
+When the auditor asks where the engagement stands ("audit status"), run `node $S/status.mjs <eng> --open`, which refreshes the page and opens it, and give them the URL. Then summarise in three lines or fewer: the cycles' readiness, the latest run's outcome, and what awaits them. The page shows:
 - cycle readiness and missing files;
 - the latest run's outcome and coverage;
 - what awaits the auditor;
 - TB balance checks (rebuilt closing against the schedule, TB and aged listing for every line item);
 - rollforwards, difference analysis with explanations and decisions, provision matrix re-performance, the statements comparison, adjustments and run history.
 
-`finalize` and `adjust` refresh it automatically.
+`finalize` and `adjust` refresh it automatically; `finalize` writes it without live mode, which stops the reloading once the run is complete.
 
 ## Adding a cycle
 

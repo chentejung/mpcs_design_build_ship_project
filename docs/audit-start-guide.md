@@ -131,7 +131,14 @@ Flags: 0 above performance materiality · 7 between thresholds · 3 clearly triv
 
 ## 5. Status page
 
-Every engagement has a status page, `engagements/<client>-<FYE>/status.html`; open it in any browser, no server needed. It is refreshed at the end of every run and after adjustments; say "audit status" (or run `node .claude/skills/audit-start/scripts/status.mjs <engagement-folder>`) to refresh it at any other time, for example after uploading files.
+Every engagement has a status page, `engagements/<client>-<FYE>/status.html`. It **opens in your browser as soon as the skill starts** ("audit start" or "audit status"):
+
+- The orchestrator serves the engagement folder on the server at `http://localhost:8740/status.html` (the next free port up to 8759), bound to localhost only.
+- When you work through VS Code Remote-SSH, VS Code forwards that port and opens the page in the browser on your own computer. On a desktop machine it opens with the system browser. If nothing can be opened, the orchestrator gives you the URL.
+- While a run is going, the page is in **live mode**: it reloads every 10 seconds and shows each cycle's progress. When the run finishes, the final page stops reloading.
+- The local server stops by itself after two hours without a request.
+
+The page is also refreshed after adjustments. To refresh it by hand, say "audit status" or run `node .claude/skills/audit-start/scripts/status.mjs <engagement-folder> --open`.
 
 | Section | Shows |
 |---|---|

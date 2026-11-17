@@ -1,6 +1,7 @@
 import type { Model } from "./handleClassify";
 
-const DEFAULT_MODELS = "gemini-3.8-flash,gemini-3.5-flash-lite";
+// flash-lite first: it scored 4/4 on the sample eval and answers reliably; 3.8-flash is often overloaded (503).
+const DEFAULT_MODELS = "gemini-3.5-flash-lite,gemini-3.8-flash";
 const RETRYABLE = new Set([429, 500, 503]);
 
 /**

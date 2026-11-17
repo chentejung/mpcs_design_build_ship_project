@@ -28,15 +28,21 @@ export function Workbench() {
   const [confirmations, setConfirmations] = useState<Record<string, ArCategory>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const suggestionCache = useRef(new Map<string, Suggestion>());
 
   async function run(
     useFiles: Partial<Record<Slot, File>>,
     useSettings: Settings,
     useConfirmations: Record<string, ArCategory>,
+    { keepResults = false } = {},
   ) {
     setBusy(true);
     setError(null);
+    // A new package or settings: clear the old results so they can't be mistaken for this run's.
+    if (!keepResults) setResult(null);
+    setStatus("Reading the files and running the checks…");
+    const classify = createBrowserClassifier(suggestionCache.current);
     try {
       const packageFiles = Object.fromEntries(
         await Promise.all(
@@ -46,19 +52,32 @@ export function Workbench() {
           ]),
         ),
       );
-      const r = await examine(packageFiles, useSettings, createBrowserClassifier(suggestionCache.current), useConfirmations);
+      const r = await examine(
+        packageFiles,
+        useSettings,
+        async (lines) => {
+          setStatus(
+            `The AI is classifying ${lines.length} journal line${lines.length === 1 ? "" : "s"} the rules couldn't place. This can take up to a minute…`,
+          );
+          return classify(lines);
+        },
+        useConfirmations,
+      );
       setResult(r);
       requestAnimationFrame(() => document.getElementById("results")?.scrollIntoView({ behavior: "smooth" }));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
+      setStatus(null);
     }
   }
 
   async function trySample(clientId: string, name: string) {
     setBusy(true);
     setError(null);
+    setResult(null);
+    setStatus(`Loading ${name}…`);
     try {
       const sample = await loadSample(clientId);
       suggestionCache.current.clear();
@@ -70,6 +89,7 @@ export function Workbench() {
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setBusy(false);
+      setStatus(null);
     }
   }
 
@@ -86,7 +106,7 @@ export function Workbench() {
 
   function confirm(next: Record<string, ArCategory>) {
     setConfirmations(next);
-    void run(files, settings, next);
+    void run(files, settings, next, { keepResults: true });
   }
 
   return (
@@ -192,6 +212,13 @@ export function Workbench() {
         </button>
         {packageName && <span className="ml-3 text-sm text-slate-500">Package: {packageName}</span>}
       </section>
+
+      {status && (
+        <div role="status" aria-live="polite" className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+          <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-blue-300 border-t-blue-700" />
+          {status}
+        </div>
+      )}
 
       {error && <p className="rounded-md bg-red-50 p-3 text-sm text-red-800">{error}</p>}
 

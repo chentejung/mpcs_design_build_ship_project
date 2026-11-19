@@ -4,3 +4,9 @@
 # OS / editor
 .DS_Store
 .vercel
+
+# Dependencies
+node_modules/
+
+# Engagement folders hold client data; only synthetic fixtures are committed
+/engagements/

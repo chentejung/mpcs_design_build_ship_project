@@ -64,12 +64,12 @@ _Avoid_: Account item sheet, AR sheet, ledger extract
 A listing, separate from the journals, that substantiates a balance at customer or item level, such as the aged receivables listing.
 _Avoid_: Sheet, source sheet, subledger (unless it is literally one)
 
-**Allowance for doubtful debts**:
-The contra-asset deducted from gross receivables to present them net; it has its own rollforward (opening + charge − write-offs used ± reversals = closing), and its charge less reversals is the bad debt expense.
-_Avoid_: Provision of AR, bad debt provision (when meaning the balance, not the expense)
+**Loss allowance**:
+The IFRS 9 expected-credit-loss contra-asset deducted from gross receivables to present them net; it has its own rollforward (opening + charge − write-offs used ± reversals = closing), and its charge less reversals is the impairment loss on trade receivables (often labelled bad debt expense in client ledgers).
+_Avoid_: Allowance for doubtful debts (the IAS 39 incurred-loss term), provision of AR, bad debt provision (when meaning the balance, not the expense)
 
 **Cross-check**:
-A check that an amount on one line item agrees with an amount on another through the journal entries they share (e.g. AR credit sales against revenue, allowance charge against bad debt expense, AR receipts against cash).
+A check that an amount on one line item agrees with an amount on another through the journal entries they share (e.g. AR credit sales against revenue, loss allowance charge against impairment loss, AR receipts against cash).
 _Avoid_: Tie-out, cross-reference, reconciliation
 
 **Schedule template**:
@@ -96,6 +96,14 @@ _Avoid_: Client FS, management accounts, draft FS
 The auditor's independent recomputation of the financial statements from opening balances and the client's current-period data, used only as an expectation to compare against the client-prepared statements.
 _Avoid_: Draft financial statements, consolidated statements, expected statements
 
+**Proposed adjustment**:
+A correction the auditor accepts from a flag, written as a balanced journal entry for the client to post.
+_Avoid_: Audit adjustment (until the client has posted it), correction, AJE
+
+**Adjusted statements**:
+The client-prepared statements with every accepted proposed adjustment applied; the client reviews and adopts them as its own, so the auditor never becomes their preparer.
+_Avoid_: Audited statements (until the opinion is signed), final statements, draft statements
+
 **Flag**:
 A specific item the tool raises for the auditor to look into, linked to the entries or schedule rows that triggered it.
 _Avoid_: Alert, issue, exception (reserve for a procedure's findings)
@@ -103,6 +111,10 @@ _Avoid_: Alert, issue, exception (reserve for a procedure's findings)
 **Unreconciled difference**:
 The amount by which opening balance plus movements fails to equal the closing balance, or by which a movement fails to agree with its supporting schedule.
 _Avoid_: Gap, variance, break
+
+**Coverage**:
+How deeply each statement line was examined in a run: deep (rebuilt from journals by a cycle's checks), shallow (only opening, movements, closing and TB agreement) or not examined.
+_Avoid_: Scope, completeness
 
 **Stop rule**:
 Any difference above the clearly trivial threshold in opening balances, line-item schedules, the trial balance or a cross-check means the client-prepared statements are not examined in that run; every such difference across all line items is still reported first.
@@ -114,13 +126,29 @@ _Avoid_: Gate, blocker, halt
 The audit firm a user belongs to; people join only by invitation, and every engagement belongs to exactly one firm.
 _Avoid_: Organisation, tenant, company (the client is a company too)
 
-**Cycle skill**:
-The instructions and permitted tools the AI model is given for one cycle's judgment tasks (e.g. classifying journal lines the rules can't place); it never computes amounts.
-_Avoid_: Agent, sub-agent, cycle agent
+**Orchestrator**:
+The agent the auditor talks to: when the auditor starts an audit, it checks every cycle's folder for its required files, starts the cycle agent of each cycle ready to run, runs the cross-checks that span cycles, applies the stop rule and assembles the results.
+_Avoid_: Main agent, master agent
+
+**Cycle agent**:
+The worker in charge of one cycle: it runs the cycle's checks and calls the line-item skill of each line item in the cycle; every amount comes from the checks, never from the agent.
+_Avoid_: Sub-agent, AR agent (an agent owns a cycle, not a line item)
+
+**Line-item skill**:
+The instructions and permitted tools the AI model is given for one line item's judgment tasks (e.g. classifying trade receivables journal lines the rules can't place); a cycle agent holds one per line item in its cycle.
+_Avoid_: Cycle skill, agent
 
 **Engagement**:
 One audit of one client for one reporting year, with its own engagement team, accounting framework (locked once created), files and results.
 _Avoid_: Project, job, audit information, client (the client is the audited company, not the audit)
+
+**Engagement folder**:
+The directory tree holding one engagement's files: a shared folder for engagement-wide files (trial balances, journal export, statements), one folder per cycle holding one folder per line item for that line item's schedules, and the record of every run.
+_Avoid_: Accounting structure, upload area, workspace
+
+**Run**:
+One examination of an engagement started by the auditor, recording which files it read and every result; never edited afterwards.
+_Avoid_: Job, execution, pass
 
 **Engagement team**:
 The people allowed to work on an engagement, added by the engagement manager; each member is a preparer or a reviewer.

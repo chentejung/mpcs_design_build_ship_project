@@ -1,0 +1,71 @@
+{
+  "id": "revenue",
+  "name": "Revenue cycle",
+  "folder": "revenue",
+  "agent": "revenue-cycle",
+  "script": "scripts/cycles/revenue.mjs",
+  "sharedFiles": ["priorYearTb", "currentTb", "journals"],
+  "lineItems": [
+    {
+      "name": "Trade receivables",
+      "folder": "trade-receivables",
+      "skill": "trade-receivables",
+      "components": ["gross", "loss-allowance"],
+      "files": [
+        {
+          "id": "arSchedule",
+          "file": "schedule.xlsx",
+          "description": "Trade receivables line-item schedule: journal lines and rollforwards",
+          "required": true,
+          "sheets": [
+            { "name": "Journal lines", "columns": ["Entry number", "Date", "Account", "Account name", "Description", "Debit", "Credit"] },
+            { "name": "Rollforward", "columns": ["Movement", "Amount"] },
+            { "name": "Allowance rollforward", "columns": ["Movement", "Amount"], "required": false }
+          ]
+        },
+        {
+          "id": "agedListing",
+          "file": "aged-listing.xlsx",
+          "description": "Aged receivables listing at year-end, one row per open invoice",
+          "required": true,
+          "sheets": [
+            { "name": "Aged listing", "columns": ["Customer", "Invoice number", "Invoice date", "Due date", "Outstanding"], "optionalColumns": ["Bucket"] }
+          ]
+        },
+        {
+          "id": "provisionMatrix",
+          "file": "provision-matrix.xlsx",
+          "description": "The client's loss allowance calculation (provision matrix)",
+          "required": false,
+          "sheets": [
+            { "name": "Provision matrix", "columns": ["Bucket", "Gross", "Rate", "Allowance"] },
+            { "name": "Individually assessed", "columns": ["Customer", "Gross", "Allowance"], "required": false }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Revenue",
+      "folder": "revenue",
+      "skill": "revenue",
+      "files": [
+        {
+          "id": "revenueSchedule",
+          "file": "schedule.xlsx",
+          "description": "Revenue line-item schedule: journal lines and rollforward",
+          "required": true,
+          "sheets": [
+            { "name": "Journal lines", "columns": ["Entry number", "Date", "Account", "Account name", "Description", "Debit", "Credit"] },
+            { "name": "Rollforward", "columns": ["Movement", "Amount"] }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Impairment losses on trade receivables",
+      "folder": "impairment-loss",
+      "skill": "impairment-loss",
+      "files": []
+    }
+  ]
+}

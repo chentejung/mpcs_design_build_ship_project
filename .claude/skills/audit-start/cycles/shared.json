@@ -1,0 +1,38 @@
+{
+  "folder": "shared",
+  "files": [
+    {
+      "id": "priorYearTb",
+      "file": "prior-year-tb.xlsx",
+      "description": "Last year's audited trial balance (before closing entries)",
+      "required": true,
+      "sheets": [{ "name": "Trial balance", "columns": ["Account", "Account name", "Debit", "Credit"], "optionalColumns": ["Line item"] }]
+    },
+    {
+      "id": "currentTb",
+      "file": "current-tb.xlsx",
+      "description": "The client's current-year trial balance (before closing entries)",
+      "required": true,
+      "sheets": [{ "name": "Trial balance", "columns": ["Account", "Account name", "Debit", "Credit"], "optionalColumns": ["Line item"] }]
+    },
+    {
+      "id": "journals",
+      "folder": "journals",
+      "description": "The full-year journal export: one workbook, or one per month",
+      "required": true,
+      "sheets": [{ "name": "Journal lines", "columns": ["Entry number", "Date", "Account", "Account name", "Description", "Debit", "Credit"] }]
+    },
+    {
+      "id": "priorYearStatements",
+      "file": "prior-year-statements.docx",
+      "description": "Last year's audited financial statements (Word)",
+      "required": true
+    },
+    {
+      "id": "clientStatements",
+      "file": "client-statements.docx",
+      "description": "The client-prepared financial statements for this year (Word)",
+      "required": true
+    }
+  ]
+}
